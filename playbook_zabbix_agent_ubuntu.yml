@@ -1,0 +1,35 @@
+---
+- name: Jenkins agent installation Playbook
+  hosts: ubuntu
+  vars:
+    zabbix_conf_path: /etc/zabbix/
+
+  tasks:
+    - name: Install zabbix .deb package from the zabbix repo.
+      apt:
+        deb: https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.2-1%2Bubuntu16.04_all.deb
+
+    - name: install "zabbix-agent" package
+      apt:
+        name: zabbix-agent
+        update_cache: yes
+
+    # update the zabbix configuration file
+    - name: Set server ip address
+      lineinfile:
+        path: "{{zabbix_conf_path}}/zabbix_agentd.conf"
+        regexp: "Server=127.0.0.1"
+        line: Server=10.126.177.206
+    - name: Set server active ip address
+      lineinfile:
+        path: "{{zabbix_conf_path}}/zabbix_agentd.conf"
+        regexp: "ServerActive=127.0.0.1"
+        line: ServerActive=10.126.177.206
+    - name: Set hostname
+      lineinfile:
+        path: "{{zabbix_conf_path}}/zabbix_agentd.conf"
+        regexp: "Hostname=Zabbix server"
+        line: Hostname={{ansible_hostname}}
+  handlers:
+    - name: Start zabbix-agent
+      service: name=zabbix-agent state=started enabled=yes

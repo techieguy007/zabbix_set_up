@@ -1,0 +1,14 @@
+version: "3.5"
+services:
+  zabbix-agent:
+    image: zabbix/zabbix-agent
+    ports:
+      - "10050:10050"
+    volumes:
+      - /jenkins_jenkins-log:/jenkins-log:ro
+    environment:
+      ZBX_SERVER_HOST: "10.126.177.206"
+      ZBX_HOSTNAME: "cia-jenkins-agent-08"
+      ZBX_DEBUGLEVEL: 4
+    privileged: true
+    restart: always

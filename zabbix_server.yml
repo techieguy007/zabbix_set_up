@@ -1,0 +1,64 @@
+version: "3.5"
+services:
+  mysql-server:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: "zabbix"
+      MYSQL_USER: "zabbix"
+      MYSQL_PASSWORD: "zabbix"
+      MYSQL_ROOT_PASSWORD: "root"
+    character-set-server: "utf8"
+    collation-server: "utf8_bin"
+    default-authentication-plugin: "mysql_native_password"
+    restart: unless-stopped
+
+  zabbix-server-mysql:
+    image: zabbix/zabbix-server-mysql
+    ports:
+      - "10051:10051"
+    environment:
+      DB_SERVER_HOST: "mysql-server"
+      MYSQL_DATABASE: "zabbix"
+      MYSQL_USER: "zabbix"
+      MYSQL_PASSWORD: "zabbix"
+      MYSQL_ROOT_PASSWORD: "root"
+    restart: unless-stopped
+    depends_on:
+      - mysql-server
+    links:
+      - mysql-server:mysql
+
+  zabbix-web-apache-mysql:
+    image: zabbix/zabbix-web-apache-mysql
+    ports:
+      - "8080:8080"
+    environment:
+      DB_SERVER_HOST: "mysql-server"
+      MYSQL_DATABASE: "zabbix"
+      MYSQL_USER: "zabbix"
+      MYSQL_PASSWORD: "zabbix"
+      MYSQL_ROOT_PASSWORD: "root"
+    restart: unless-stopped
+    depends_on:
+      - mysql-server
+      - zabbix-server-mysql
+    links:
+      - mysql-server:mysql
+      - zabbix-server-mysql:zabbix-server
+
+  zabbix-agent:
+    image: zabbix/zabbix-agent
+    ports:
+      - "10050:10050"
+    environment:
+      ZBX_SERVER_HOST: "zabbix-server"
+      ZBX_HOSTNAME: "zabbix-server"
+      ZBX_DEBUGLEVEL: 4
+    privileged: true
+    restart: unless-stopped
+    depends_on:
+      - mysql-server
+      - zabbix-server-mysql
+      - zabbix-web-apache-mysql
+    links:
+      - zabbix-server-mysql:zabbix-server

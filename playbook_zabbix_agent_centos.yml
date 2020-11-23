@@ -1,0 +1,36 @@
+---
+- name: Jenkins agent installation Playbook
+  hosts: centos
+  vars:
+    zabbix_conf_path: /etc/zabbix/
+
+  tasks:
+    - name: Install zabbix rpm package from the zabbix repo.
+      yum:
+        name: https://repo.zabbix.com/zabbix/5.2/rhel/7/x86_64/zabbix-agent-5.2.1-1.el7.x86_64.rpm
+        state: present
+    - name: install "zabbix-agent" package
+      yum:
+        name: zabbix-agent
+        state: present
+        update_cache: yes
+
+    # update the zabbix configuration file
+    - name: Set server ip address
+      lineinfile:
+        path: "{{zabbix_conf_path}}/zabbix_agentd.conf"
+        regexp: "Server=127.0.0.1"
+        line: Server=10.126.177.206
+    - name: Set server active ip address
+      lineinfile:
+        path: "{{zabbix_conf_path}}/zabbix_agentd.conf"
+        regexp: "ServerActive=127.0.0.1"
+        line: ServerActive=10.126.177.206
+    - name: Set hostname
+      lineinfile:
+        path: "{{zabbix_conf_path}}/zabbix_agentd.conf"
+        regexp: "Hostname=Zabbix server"
+        line: Hostname={{ansible_hostname}}
+  handlers:
+    - name: Start zabbix-agent
+      service: name=zabbix-agent state=started enabled=yes
