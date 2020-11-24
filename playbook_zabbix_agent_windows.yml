@@ -24,12 +24,12 @@
       lineinfile:
         path: '{{ zabbix_conf_path }}\zabbix_agentd.conf'
         regexp: "Server=127.0.0.1"
-        line: Server=10.126.177.206
+        line: Server="YOUR SERVER IP"
     - name: Set server active ip address
       lineinfile:
         path: '{{ zabbix_conf_path }}\zabbix_agentd.conf'
         regexp: "ServerActive=127.0.0.1"
-        line: ServerActive=10.126.177.206
+        line: ServerActive="10.126.177.206"
     - name: Set hostname
       lineinfile:
         path: '{{ zabbix_conf_path }}\zabbix_agentd.conf'
